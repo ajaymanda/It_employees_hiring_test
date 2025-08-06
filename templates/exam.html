@@ -1,0 +1,57 @@
+<script>
+    function enterFullScreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+
+    function sendWarning(reason) {
+        fetch("{% url 'log_exam_warning' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ reason: reason })
+        });
+    }
+
+    function monitorFullScreenExit() {
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                alert("⚠️ You exited full screen. This has been reported.");
+                sendWarning("Exited fullscreen");
+            }
+        });
+    }
+
+    function monitorTabSwitch() {
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                alert("⚠️ You switched tabs. This has been reported.");
+                sendWarning("Switched tabs or minimized");
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        enterFullScreen();
+        monitorFullScreenExit();
+        monitorTabSwitch();
+
+        // Webcam and question scrolling logic
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                const video = document.getElementById('liveVideo');
+                if (video) video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Camera access denied:", err);
+            });
+    });
+</script>

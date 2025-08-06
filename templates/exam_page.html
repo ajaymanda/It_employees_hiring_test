@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exam Page</title>
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --primary-hover: #0056b3;
+            --background: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-dark: #333;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            margin-left: 200px;
+            padding: 30px;
+            color: var(--text-dark);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            color: rgb(6, 62, 105);
+        }
+
+        .question {
+            background-color: var(--card-bg);
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+        }
+
+        .question h4 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .question label {
+            display: block;
+            margin: 10px 0;
+            padding-left: 10px;
+            cursor: pointer;
+        }
+
+        .question label:hover {
+            background-color: #f9f9f9;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        button {
+            display: block;
+            margin: 40px auto 0;
+            padding: 14px 40px;
+            font-size: 18px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 160px;
+        }
+
+        .sidebar h4 {
+            margin-bottom: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            text-align: center;
+        }
+
+        .question-numbers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .question-number {
+            background-color: #f1f1f1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .question-number:hover {
+            background-color: #ddd;
+        }
+
+        .question-number.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .video-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 160px;
+            border: 3px solid var(rgb(6, 62, 105));
+            border-radius: 12px;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mic-visualizer {
+            margin-top: 10px;
+            width: 100%;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 2px solid  rgb(6, 62, 105);
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .mic-visualizer-label {
+            position: absolute;
+            top: -2px;
+            left: 10px;
+            background-color: #ffffff;
+            padding: 0 5px;
+            font-weight: bold;
+            color:  rgb(6, 62, 105);
+            font-size: 14px;
+        }
+
+        #micCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .countdown-timer {
+            position: fixed;
+            top: 20px;
+            right: 280px;
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 18px;
+            font-weight: bold;
+            color: #d9534f;
+        }
+
+        .fixed-username {
+            position: fixed;
+            top: 20px;
+            left: 200px;
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 999;
+            color: rgb(6, 62, 105);
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .sidebar,
+            .video-container,
+            .countdown-timer {
+                position: relative;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .fixed-username {
+                left: 20px;
+                top: 0;
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="fixed-username">
+        UserName: {{ employee.user_name }}<br>
+        Email: {{ employee.email }}
+    </div>
+    <div class="question-numbers">
+        {% for question in questions %}
+            <div class="question-number" data-qid="{{ question.id }}">{{ forloop.counter }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Video & Mic -->
+<div class="video-container">
+    <div class="video-feed">
+        <video id="liveVideo" autoplay muted></video>
+    </div>
+    <div class="mic-visualizer">
+        <div class="mic-visualizer-label">Mic Signal</div>
+        <canvas id="micCanvas" width="240" height="50"></canvas>
+    </div>
+</div>
+
+<!-- Timer -->
+<div class="countdown-timer">
+    Time Left: <span id="timer">60:00</span>
+</div>
+
+<h2>MCQ Questions</h2>
+
+<form method="post" action="{% url 'submit_exam' %}">
+    {% csrf_token %}
+    {% for question in questions %}
+        <div class="question" id="question_{{ question.id }}">
+            <h4>{{ forloop.counter }}. {{ question.text }}</h4>
+            <label><input type="radio" name="question_{{ question.id }}" value="A" required> {{ question.option_a }}</label>
+            <label><input type="radio" name="question_{{ question.id }}" value="B"> {{ question.option_b }}</label>
+            <label><input type="radio" name="question_{{ question.id }}" value="C"> {{ question.option_c }}</label>
+            <label><input type="radio" name="question_{{ question.id }}" value="D"> {{ question.option_d }}</label>
+        </div>
+    {% endfor %}
+    <button type="submit">Submit Exam</button>
+</form>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const radios = document.querySelectorAll('input[type="radio"]');
+    radios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            const qid = this.name.split('_')[1];
+            highlightQuestion(qid);
+        });
+    });
+
+    const qBtns = document.querySelectorAll('.question-number');
+    qBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const questionDiv = document.getElementById(`question_${btn.dataset.qid}`);
+            if (questionDiv) {
+                questionDiv.scrollIntoView({ behavior: "smooth" });
+            }
+        });
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            const video = document.getElementById('liveVideo');
+            video.srcObject = stream;
+
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            source.connect(analyser);
+
+            const canvas = document.getElementById('micCanvas');
+            const canvasCtx = canvas.getContext('2d');
+
+            function draw() {
+                requestAnimationFrame(draw);
+
+                analyser.getByteTimeDomainData(dataArray);
+
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                canvasCtx.fillStyle = '#ffffff';
+                canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = ' rgb(6, 62, 105)'
+                canvasCtx.beginPath();
+
+                const sliceWidth = canvas.width / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * canvas.height / 2;
+
+                    if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                canvasCtx.lineTo(canvas.width, canvas.height / 2);
+                canvasCtx.stroke();
+            }
+
+            draw();
+        })
+        .catch(err => {
+            console.error("Camera/Microphone access denied:", err);
+            alert("Please allow camera and microphone access to continue the exam.");
+        });
+
+    // Timer
+    let totalTime = 60 * 60;
+    const timerDisplay = document.getElementById('timer');
+
+    const countdown = setInterval(() => {
+        let minutes = Math.floor(totalTime / 60);
+        let seconds = totalTime % 60;
+        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (totalTime <= 0) {
+            clearInterval(countdown);
+            alert("Time is up! Submitting your exam.");
+            document.querySelector('form').submit();
+        }
+
+        totalTime--;
+    }, 1000);
+});
+
+function highlightQuestion(questionId) {
+    const buttons = document.querySelectorAll('.question-number');
+    buttons.forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.qid === questionId);
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<video id="liveVideo" autoplay style="width: 300px; display: none;"></video>
+<script>
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    const video = document.getElementById('liveVideo');
+    video.srcObject = stream;
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    setInterval(() => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL('image/jpeg');
+
+        fetch('/save-snapshot/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ image: dataURL, employee_id: '{{ employee.id }}' })
+        });
+    }, 30000); // capture every 30 seconds
+  })
+  .catch(err => console.error("Camera error:", err));
+</script>

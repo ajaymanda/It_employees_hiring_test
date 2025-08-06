@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Take 5 Photos</title>
+    <h3>Exam was strictly moniterig</h3>
+    <h3>Show you'r face middle of the cam properly</h3>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 40px;
+            background-color: #f5f6fa;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        video {
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #photos img {
+            margin: 10px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            width: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 6px;
+        }
+        button:disabled {
+            background-color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h2>Capture 5 Photos</h2>
+    <video id="video" width="320" height="240" autoplay></video><br>
+    <button id="capture">Capture</button>
+    <button id="submit" style="display:none;">Submit</button>
+    <div id="photos"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureBtn = document.getElementById('capture');
+        const submitBtn = document.getElementById('submit');
+        const photosDiv = document.getElementById('photos');
+        let images = [];
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => video.srcObject = stream)
+            .catch(() => alert("Camera access denied"));
+
+        captureBtn.onclick = () => {
+            if (images.length >= 5) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 240;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg', 0.6);
+            images.push(imgData);
+
+            const img = new Image();
+            img.src = imgData;
+            photosDiv.appendChild(img);
+
+            if (images.length === 5) {
+                captureBtn.disabled = true;
+                submitBtn.style.display = 'inline';
+            }
+        };
+
+        submitBtn.onclick = () => {
+            fetch('/upload_photos/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ images })
+            }).then(res => {
+                if (res.ok) {
+                    window.location.href = "/exam/";
+                } else {
+                    alert("Upload failed.");
+                }
+            });
+        };
+
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    return cookie.substring(name.length + 1);
+                }
+            }
+            return '';
+        }
+    </script>
+</body>
+</html>

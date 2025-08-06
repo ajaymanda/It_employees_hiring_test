@@ -1,0 +1,12 @@
+<h2>Snapshots for {{ employee.name }}</h2>
+
+{% for snapshot in snapshots %}
+  <div style="margin-bottom: 20px;">
+    <p>{{ snapshot.timestamp }}</p>
+    {% if snapshot.image %}
+      <img src="{{ snapshot.image.url }}" width="300" />
+    {% else %}
+      <p>No image available.</p>
+    {% endif %}
+  </div>
+{% endfor %}
